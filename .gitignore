@@ -1,0 +1,75 @@
+# Environment and Credential Files
+.env
+.env.local
+.env.*.local
+
+# AWS Credentials
+aws-credentials
+credentials
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Coverage Output
+coverage_output/
+test_coverage_output/
+*.gcov
+*.gcda
+*.gcno
+coverage.info
+coverage.xml
+
+# Temporary Files
+temp_repos/
+tmp/
+*.tmp
+*.log
+
+# Test Files
+test_*.py
+*_test.py
+
+# Backup Files
+*.bak
+*.backup
+*~

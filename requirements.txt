@@ -1,0 +1,21 @@
+# Requirements for GitHub Repository Coverage Generator
+
+# Core dependencies
+gitpython>=3.1.0
+configparser>=5.0.0
+pathlib>=1.0.0
+
+# Optional dependencies for enhanced functionality
+beautifulsoup4>=4.9.0
+requests>=2.25.0
+jinja2>=3.0.0
+
+# AWS Bedrock LLM Integration
+boto3>=1.26.0
+botocore>=1.29.0
+anthropic>=0.5.0
+python-dotenv>=1.0.0
+
+# Development and testing
+pytest>=6.0.0
+coverage>=5.0.0
