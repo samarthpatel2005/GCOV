@@ -10,6 +10,7 @@ This enhanced version now supports **both Gcov-compatible and non-compatible rep
 2. **🔍 Smart Compatibility Detection**: Automatically detects if a repository supports Gcov or needs assistance
 3. **⚙️ Temporary Modifications**: Applies changes temporarily without committing them to the repository
 4. **📊 Enhanced Analysis**: Deep repository structure analysis for better coverage generation
+5. **🐍 Python Launcher**: Cross-platform Python launcher with advanced features and real-time output
 
 ## 🛠️ How It Works
 
@@ -57,16 +58,34 @@ create_backup_before_changes = true
 
 ## 🚀 Usage
 
-### Option 1: Use Enhanced Version (v2.0)
+### Option 1: Python Launcher (Recommended)
 ```cmd
-run_coverage_v2.bat
+python run_coverage.py
 ```
 or with specific repository:
 ```cmd
-run_coverage_v2.bat https://github.com/username/repository.git
+python run_coverage.py https://github.com/username/repository.git
 ```
 
-### Option 2: Python Direct
+Additional options:
+```cmd
+# Don't open browser automatically
+python run_coverage.py --no-browser https://github.com/username/repository.git
+
+# Custom output directory
+python run_coverage.py --output-dir my_coverage https://github.com/username/repository.git
+```
+
+### Option 2: Batch File (Windows)
+```cmd
+run_coverage.bat
+```
+or with specific repository:
+```cmd
+run_coverage.bat https://github.com/username/repository.git
+```
+
+### Option 3: Python Direct
 ```cmd
 python generate_coverage_v2.py https://github.com/username/repository.git
 ```

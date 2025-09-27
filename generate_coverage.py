@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Enhanced GitHub Repository Code Coverage Generator with LLM Integration
 Supports both Gcov-compatible and non-compatible repositories using AWS Bedrock
@@ -16,6 +17,40 @@ import configparser
 from pathlib import Path
 import urllib.parse
 from typing import Dict, List, Tuple, Optional
+
+# Set up Unicode encoding for Windows
+if sys.platform.startswith('win'):
+    # Set console code page to UTF-8
+    try:
+        os.system('chcp 65001 >nul 2>&1')
+        # Set environment variables for Python Unicode support
+        os.environ['PYTHONIOENCODING'] = 'utf-8'
+        os.environ['PYTHONLEGACYWINDOWSSTDIO'] = '0'
+    except:
+        pass
+
+def safe_print(message):
+    """Safely print messages with Unicode fallback for Windows"""
+    try:
+        print(message)
+    except UnicodeEncodeError:
+        # Fallback: replace problematic characters with safe alternatives
+        safe_message = (message
+                       .replace('📥', '[DOWNLOAD]')
+                       .replace('🧹', '[CLEANUP]')
+                       .replace('🤖', '[LLM]')
+                       .replace('📝', '[INFO]')
+                       .replace('⚙️', '[CONFIG]')
+                       .replace('🔨', '[BUILD]')
+                       .replace('🧪', '[TEST]')
+                       .replace('📊', '[COVERAGE]')
+                       .replace('📄', '[REPORT]')
+                       .replace('✅', '[SUCCESS]')
+                       .replace('❌', '[ERROR]')
+                       .replace('⚠️', '[WARNING]')
+                       .replace('🚀', '[RUN]')
+                       .replace('🎉', '[COMPLETE]'))
+        print(safe_message)
 
 # Import our LLM assistant
 from llm_coverage_assistant import LLMCoverageAssistant
@@ -577,7 +612,7 @@ class EnhancedCoverageGeneratorV2:
     
     def clone_repository(self):
         """Clone the GitHub repository"""
-        print(f"📥 Cloning repository: {self.repo_url}")
+        safe_print(f"📥 Cloning repository: {self.repo_url}")
         
         # Create temporary directory
         self.temp_dir = Path(tempfile.mkdtemp())
@@ -596,7 +631,7 @@ class EnhancedCoverageGeneratorV2:
     
     def _cleanup(self):
         """Clean up temporary files and rollback modifications"""
-        print("\n🧹 Cleaning up...")
+        safe_print("\n🧹 Cleaning up...")
         
         # Rollback LLM modifications
         if self.applied_modifications:
