@@ -14,12 +14,15 @@ from dotenv import load_dotenv
 
 
 class LLMCoverageAssistant:
-    def __init__(self, config_path="config.ini", env_path=".env"):
+    def __init__(self, config_path="config.ini", env_path=".env", prompt_path="prompt.txt"):
         # Load environment variables from .env file
         load_dotenv(env_path)
         
         self.config = configparser.ConfigParser()
         self.config.read(config_path)
+        
+        # Store prompt file path
+        self.prompt_path = prompt_path
         
         # AWS Bedrock configuration
         self.region = self.config.get('AWS_BEDROCK', 'region', fallback='us-east-1')
@@ -57,6 +60,58 @@ class LLMCoverageAssistant:
             print(f"Warning: Could not initialize AWS Bedrock client: {e}")
             print("LLM features will use fallback mode")
             self.bedrock_client = None
+    
+    def _load_prompt_template(self) -> str:
+        """Load prompt template from external file"""
+        try:
+            with open(self.prompt_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                # Remove comments (lines starting with #)
+                lines = content.split('\n')
+                prompt_lines = [line for line in lines if not line.strip().startswith('#')]
+                return '\n'.join(prompt_lines).strip()
+        except FileNotFoundError:
+            print(f"Warning: Prompt file {self.prompt_path} not found, using default prompt")
+            return self._get_default_prompt_template()
+        except Exception as e:
+            print(f"Warning: Error reading prompt file {self.prompt_path}: {e}")
+            return self._get_default_prompt_template()
+    
+    def _get_default_prompt_template(self) -> str:
+        """Fallback default prompt template"""
+        return """You are a C/C++ build system expert. Help make this repository compatible with Gcov code coverage.
+
+Repository Analysis:
+- Project Type: {project_type}
+- Build System: {build_system}
+- Source Files: {source_files}
+- Has Tests: {has_tests}
+
+Compatibility Issues Found:
+{compatibility_issues}
+
+Current Build Files:
+{build_files_content}
+
+Please provide SPECIFIC modifications to make this repository Gcov-compatible:
+
+1. MAKEFILE_CHANGES: Exact lines to add/modify in Makefile (if applicable)
+2. CMAKE_CHANGES: Exact lines to add/modify in CMakeLists.txt (if applicable) 
+3. TEST_COMPILATION: How to compile tests with coverage
+4. GCOV_COMMANDS: Exact commands to generate coverage data
+5. MISSING_FILES: Any files that need to be created
+
+Respond in JSON format:
+{{
+    "modifications": {{
+        "makefile_changes": ["line1", "line2"],
+        "cmake_changes": ["line1", "line2"],
+        "test_compilation": "exact command",
+        "gcov_commands": ["cmd1", "cmd2"],
+        "missing_files": [{{"path": "filename", "content": "file content"}}]
+    }},
+    "explanation": "Brief explanation of changes"
+}}"""
     
     def analyze_repository_structure(self, repo_path: Path) -> Dict:
         """Analyze repository structure to understand project type and build system"""
@@ -189,44 +244,26 @@ class LLMCoverageAssistant:
     
     def _create_gcov_prompt(self, context: Dict, build_files_content: Dict) -> str:
         """Create prompt for LLM to generate Gcov modifications"""
-        prompt = f"""You are a C/C++ build system expert. Help make this repository compatible with Gcov code coverage.
-
-Repository Analysis:
-- Project Type: {context['project_type']}
-- Build System: {context['build_system']}
-- Source Files: {', '.join(context['source_files'])}
-- Has Tests: {context['has_tests']}
-
-Compatibility Issues Found:
-{chr(10).join(f"- {issue}" for issue in context['compatibility_issues'])}
-
-Current Build Files:
-"""
+        # Load prompt template from file
+        prompt_template = self._load_prompt_template()
         
+        # Format build files content
+        build_files_text = ""
         for file_name, content in build_files_content.items():
-            prompt += f"\n=== {file_name} ===\n{content[:1000]}...\n"
+            build_files_text += f"\n=== {file_name} ===\n{content[:1000]}...\n"
         
-        prompt += """
-
-Please provide SPECIFIC modifications to make this repository Gcov-compatible:
-
-1. MAKEFILE_CHANGES: Exact lines to add/modify in Makefile (if applicable)
-2. CMAKE_CHANGES: Exact lines to add/modify in CMakeLists.txt (if applicable) 
-3. TEST_COMPILATION: How to compile tests with coverage
-4. GCOV_COMMANDS: Exact commands to generate coverage data
-5. MISSING_FILES: Any files that need to be created
-
-Respond in JSON format:
-{
-    "modifications": {
-        "makefile_changes": ["line1", "line2"],
-        "cmake_changes": ["line1", "line2"],
-        "test_compilation": "exact command",
-        "gcov_commands": ["cmd1", "cmd2"],
-        "missing_files": [{"path": "filename", "content": "file content"}]
-    },
-    "explanation": "Brief explanation of changes"
-}"""
+        # Format compatibility issues
+        issues_text = chr(10).join(f"- {issue}" for issue in context['compatibility_issues'])
+        
+        # Replace template variables
+        prompt = prompt_template.format(
+            project_type=context['project_type'],
+            build_system=context['build_system'],
+            source_files=', '.join(context['source_files']),
+            has_tests=context['has_tests'],
+            compatibility_issues=issues_text,
+            build_files_content=build_files_text
+        )
         
         return prompt
     

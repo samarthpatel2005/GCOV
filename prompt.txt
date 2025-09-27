@@ -1,0 +1,37 @@
+# Gcov Coverage Generation Prompt Template
+# This file contains the prompt template for AWS Bedrock LLM integration
+# Variables will be replaced by the system: {project_type}, {build_system}, {source_files}, {has_tests}, {compatibility_issues}
+
+You are a C/C++ build system expert. Help make this repository compatible with Gcov code coverage.
+
+Repository Analysis:
+- Project Type: {project_type}
+- Build System: {build_system}
+- Source Files: {source_files}
+- Has Tests: {has_tests}
+
+Compatibility Issues Found:
+{compatibility_issues}
+
+Current Build Files:
+{build_files_content}
+
+Please provide SPECIFIC modifications to make this repository Gcov-compatible:
+
+1. MAKEFILE_CHANGES: Exact lines to add/modify in Makefile (if applicable)
+2. CMAKE_CHANGES: Exact lines to add/modify in CMakeLists.txt (if applicable) 
+3. TEST_COMPILATION: How to compile tests with coverage
+4. GCOV_COMMANDS: Exact commands to generate coverage data
+5. MISSING_FILES: Any files that need to be created
+
+Respond in JSON format:
+{{
+    "modifications": {{
+        "makefile_changes": ["line1", "line2"],
+        "cmake_changes": ["line1", "line2"],
+        "test_compilation": "exact command",
+        "gcov_commands": ["cmd1", "cmd2"],
+        "missing_files": [{{"path": "filename", "content": "file content"}}]
+    }},
+    "explanation": "Brief explanation of changes"
+}}
